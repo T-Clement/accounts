@@ -1,0 +1,28 @@
+[
+    {
+        "notification_key": "del_ok", 
+        "notification_txt":"Suppression correctement effectuée"
+    },
+    {
+        "notification_key": "del_error", 
+        "notification_txt":"La suppression n'a pu s'effectuer"
+    },
+    {
+        "notification_key": "update_ok", 
+        "notification_txt":"Votre opération a été mise à jour"
+    },
+    {
+        "notification_key": "update_error", 
+        "notification_txt":"Votre opération n'a pu être mise à jour"
+    },
+    {
+        "notification_key": "add_ok", 
+        "notification_txt":"Votre opération bancaire a été ajoutée"
+    },
+    {
+        "notification_key": "add_error", 
+        "notification_txt":"Votre opération bancaire a été supprimée"
+    }
+]
+
+

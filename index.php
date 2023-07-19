@@ -1,6 +1,20 @@
-<?php require '_includes/_database.php';
+<?php
+try {
+    $fileContent = file_get_contents("notifs.json");
+    $notifs = json_decode($fileContent, true);
+} catch (Exception $e) {
+    echo "Something went wrong with json file...";
+    exit;
+}
 
+
+require '_includes/_database.php';
+require '_includes/_functions.php';
 // var_dump($_ENV);
+
+session_start();
+$token = md5(uniqid(mt_rand(), true));
+$_SESSION['token'] = $token;
 
 
 // id_transaction, name, amount, date_transaction, id_category
@@ -13,40 +27,54 @@ $date = new DateTime();
 
 
 // get all the transactions from the current month
-$query = $dbCo->prepare("SELECT * FROM transaction WHERE date_transaction LIKE :current_month ORDER BY date_transaction DESC");
+$query = $dbCo->prepare("SELECT * 
+FROM transaction
+	LEFT JOIN category USING (id_category)
+WHERE date_transaction LIKE :current_month
+ORDER BY date_transaction DESC");
 $isOk = $query->execute([
     "current_month" => $date->format("Y-m").'%'
 ]);
 $transactionsMonths = $query->fetchAll();
-
+// var_dump($transactionsMonths);
 
 $query = $dbCo->prepare("SELECT SUM(amount) AS 'account_amount' FROM transaction WHERE DATE_FORMAT(date_transaction, '%Y-%m') <= DATE_FORMAT(NOW(), '%Y-%m')");
 $isOk = $query->execute();
 $accountAmount = $query->fetch();
 
 
+// $notif = [
+//     "del_ok"=> "Suppression correctement effectuée",
+//     "del_error"=> "La suppression n'a pu s'effectuer",
+//     "update_ok"=> "Votre opération a été mise à jour",
+//     "update_error"=> "Votre opération n'a pu être mise à jour",
+// ]
 
-
-
+//------------------------------------------------------------------
+//------------------------------------------------------------------
+//------------------------------------------------------------------
+$notifData = [];
+if (isset($_GET["notif"])) {
+    foreach ($notifs as $notification) {
+        $notificationKey = $notification['notification_key'];
+        $notificationText = $notification['notification_txt'];
+        if ($notificationKey == $_GET["notif"]) {
+                $notifData[$notificationKey] = $notificationText;
+                break;
+            } else {
+                // var_dump("Aucune correspondance");
+            }
+        }
+    }
+    
+//------------------------------------------------------------------
+//------------------------------------------------------------------
+//------------------------------------------------------------------
+//------------------------------------------------------------------
 
 ?>
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 <?php require '_includes/_header.php'?>
-
 
     <div class="container">
         <section class="card mb-4 rounded-3 shadow-sm">
@@ -54,9 +82,17 @@ $accountAmount = $query->fetch();
                 <h2 class="my-0 fw-normal fs-4">Solde aujourd'hui</h2>
             </div>
             <div class="card-body">
-                <p class="card-title pricing-card-title text-center fs-1"><?=implode($accountAmount)?> €</p>
+                <p class="card-title pricing-card-title text-center fs-1"><span class="js-account-amount"><?=implode($accountAmount)?></span> €</p>
             </div>
         </section>
+        <div id="notif" class="notif">
+            <?php
+            if (isset($_GET["notif"])) {
+                $cssClassNotif = array_search($notifData[$_GET["notif"]], $notifData);
+                echo "<p class='notif-style $cssClassNotif active  js-notif'>" . $notifData[$_GET["notif"]] . "</p>";
+            }
+            ?>
+        </div>
 
         <section class="card mb-4 rounded-3 shadow-sm">
             <div class="card-header py-3">
@@ -75,167 +111,31 @@ $accountAmount = $query->fetch();
                         <?php
                         foreach($transactionsMonths as $transaction) {
                             $dateTransaction = new DateTime($transaction["date_transaction"]);
-                            echo '<tr>
+                            echo '<tr class="js-transaction-row">
+                                    
                                     <td width="50" class="ps-3">
+                                        <i class="bi bi-' . $transaction["icon_class"] .' fs-3"></i>
                                     </td>
                                     <td>
                                         <time datetime="' . $dateTransaction->format("Y-m-d") . '" class="d-block fst-italic fw-light">' . $dateTransaction->format("d-m-Y") . '</time>
                                         ' . $transaction['name'] . '
                                     </td>
                                     <td class="text-end">
-                                        <span class="rounded-pill text-nowrap bg-warning-subtle px-2">
+                                        <span class="rounded-pill text-nowrap ' . applyColorToOperation($transaction["amount"]) . ' px-2 js-transaction-amount" data-id="' . $transaction["id_transaction"] . '">
                                             '. $transaction['amount'] .'
                                         </span>
                                     </td>
                                     <td class="text-end text-nowrap">
-                                        <a href="#" class="btn btn-outline-primary btn-sm rounded-circle">
+                                        <a class="btn btn-outline-primary btn-sm rounded-circle">
                                             <i class="bi bi-pencil"></i>
-                                        </a>
-                                        <a href="#" class="btn btn-outline-danger btn-sm rounded-circle">
+                                        </a>';
+                                        echo '<a href="actions.php?action=delete&id='. $transaction["id_transaction"].'" class="btn btn-outline-danger btn-sm rounded-circle js-delete" data-id="'. $transaction["id_transaction"] .'">
                                             <i class="bi bi-trash"></i>
                                         </a>
                                     </td>
                                 </tr>';
                             }
-                        
-                        
-                        
                         ?>
-
-
-
-
-
-                        <tr>
-                            <td width="50" class="ps-3">
-                            </td>
-                            <td>
-                                <time datetime="2023-07-10" class="d-block fst-italic fw-light">10/07/2023</time>
-                                Bar
-                            </td>
-                            <td class="text-end">
-                                <span class="rounded-pill text-nowrap bg-warning-subtle px-2">
-                                    - 32,00 €
-                                </span>
-                            </td>
-                            <td class="text-end text-nowrap">
-                                <a href="#" class="btn btn-outline-primary btn-sm rounded-circle">
-                                    <i class="bi bi-pencil"></i>
-                                </a>
-                                <a href="#" class="btn btn-outline-danger btn-sm rounded-circle">
-                                    <i class="bi bi-trash"></i>
-                                </a>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td width="50" class="ps-3">
-                                <i class="bi bi-car-front fs-3"></i>
-                            </td>
-                            <td>
-                                <time datetime="2023-07-10" class="d-block fst-italic fw-light">10/07/2023</time>
-                                Essence voiture
-                            </td>
-                            <td class="text-end">
-                                <span class="rounded-pill text-nowrap bg-warning-subtle px-2">
-                                    - 94,00 €
-                                </span>
-                            </td>
-                            <td class="text-end text-nowrap">
-                                <a href="#" class="btn btn-outline-primary btn-sm rounded-circle">
-                                    <i class="bi bi-pencil"></i>
-                                </a>
-                                <a href="#" class="btn btn-outline-danger btn-sm rounded-circle">
-                                    <i class="bi bi-trash"></i>
-                                </a>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td width="50" class="ps-3">
-                            </td>
-                            <td>
-                                <time datetime="2023-07-08" class="d-block fst-italic fw-light">8/07/2023</time>
-                                Facture électricité
-                            </td>
-                            <td class="text-end">
-                                <span class="rounded-pill text-nowrap bg-warning-subtle px-2">
-                                    - 83,00 €
-                                </span>
-                            </td>
-                            <td class="text-end text-nowrap">
-                                <a href="#" class="btn btn-outline-primary btn-sm rounded-circle">
-                                    <i class="bi bi-pencil"></i>
-                                </a>
-                                <a href="#" class="btn btn-outline-danger btn-sm rounded-circle">
-                                    <i class="bi bi-trash"></i>
-                                </a>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td width="50" class="ps-3">
-                                <i class="bi bi-house-door fs-3"></i>
-                            </td>
-                            <td>
-                                <time datetime="2023-07-05" class="d-block fst-italic fw-light">5/07/2023</time>
-                                Loyer de Juillet 2023
-                            </td>
-                            <td class="text-end">
-                                <span class="rounded-pill text-nowrap bg-warning-subtle px-2">
-                                    - 432,00 €
-                                </span>
-                            </td>
-                            <td class="text-end text-nowrap">
-                                <a href="#" class="btn btn-outline-primary btn-sm rounded-circle">
-                                    <i class="bi bi-pencil"></i>
-                                </a>
-                                <a href="#" class="btn btn-outline-danger btn-sm rounded-circle">
-                                    <i class="bi bi-trash"></i>
-                                </a>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td width="50" class="ps-3">
-                                <i class="bi bi-train-front fs-3"></i>
-                            </td>
-                            <td>
-                                <time datetime="2023-07-02" class="d-block fst-italic fw-light">2/07/2023</time>
-                                Billets de train Lille
-                            </td>
-                            <td class="text-end">
-                                <span class="rounded-pill text-nowrap bg-warning-subtle px-2">
-                                    - 89,00 €
-                                </span>
-                            </td>
-                            <td class="text-end text-nowrap">
-                                <a href="#" class="btn btn-outline-primary btn-sm rounded-circle">
-                                    <i class="bi bi-pencil"></i>
-                                </a>
-                                <a href="#" class="btn btn-outline-danger btn-sm rounded-circle">
-                                    <i class="bi bi-trash"></i>
-                                </a>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td width="50" class="ps-3">
-                                <i class="bi bi-bandaid fs-3"></i>
-                            </td>
-                            <td>
-                                <time datetime="2023-07-02" class="d-block fst-italic fw-light">2/07/2023</time>
-                                Reboursement sécurité sociale
-                            </td>
-                            <td class="text-end">
-                                <span class="rounded-pill text-nowrap bg-success-subtle px-2">
-                                    + 48,00 €
-                                </span>
-                            </td>
-                            <td class="text-end text-nowrap">
-                                <a href="#" class="btn btn-outline-primary btn-sm rounded-circle">
-                                    <i class="bi bi-pencil"></i>
-                                </a>
-                                <a href="#" class="btn btn-outline-danger btn-sm rounded-circle">
-                                    <i class="bi bi-trash"></i>
-                                </a>
-                            </td>
-                        </tr>
                     </tbody>
                 </table>
             </div>
@@ -266,5 +166,5 @@ $accountAmount = $query->fetch();
             </div>
         </section>
     </div>
-
+    <script src="script.js"></script>
     <?php require '_includes/_footer.php'?>

@@ -1,45 +1,7 @@
-<?php require '_includes/_database.php'?>
-<?php require '_includes/_header.php'?>
-<?php
-session_start();
-if (!(array_key_exists('HTTP_REFERER', $_SERVER)) && str_contains($_SERVER['HTTP_REFERER'], $_ENV["URL"])) {
-    header('Location: index.php?msg=error_referer');
-    exit;
-}
-
-// else if ($_SESSION['token'] !== $_REQUEST["token"]) {
-//     // var_dump($_SESSION['token'], $_REQUEST['token']);
-//     header('Location: index.php?msg=error_csrf');
-//     exit;
-// }
-
-
-if(!empty($_POST)) {
-    $query = $dbCo->prepare("INSERT INTO transaction (name, amount, date_transaction, id_category) VALUES (:name, :amount, :date_transaction, :category)");
-    $isOk = $query->execute([
-        'name'=> trim(strip_tags($_POST['name'])),
-        'amount'=> intval(trim(strip_tags($_POST['amount']))),
-        'date_transaction'=> $_POST['date'],
-        'category'=> $_POST['category']
-    ]);
-    if(!$isOk) {
-        header('Location: index.php?notif=add_error');
-    } else {
-        header('Location: index.php?notif=add_ok');
-    }
-    var_dump($isOk);
-}
-
-?>
-    <?php 
-    $formOperationTitle = "Ajouter une opération";
-    $formValidation = "Ajouter";
-    require '_includes/_form.php'
-    ?>
-    <!-- <div class="container">
+<div class="container">
         <section class="card mb-4 rounded-3 shadow-sm">
             <div class="card-header py-3">
-                <h1 class="my-0 fw-normal fs-4">Ajouter une opération</h1>
+                <h1 class="my-0 fw-normal fs-4"><?=$formOperationTitle?></h1>
             </div>
             <div class="card-body">
                 <form action="add.php" method="POST">
@@ -74,11 +36,8 @@ if(!empty($_POST)) {
                         </select>
                     </div>
                     <div class="text-center">
-                        <button type="submit" class="btn btn-primary btn-lg">Ajouter</button>
+                        <button type="submit" class="btn btn-primary btn-lg"><?=$formValidation?></button>
                     </div>
                 </form>
             </div>
         </section>
-    </div> -->
-    <script src="script.js"></script>
-    <?php require '_includes/_footer.php'?>
