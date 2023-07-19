@@ -43,13 +43,6 @@ $isOk = $query->execute();
 $accountAmount = $query->fetch();
 
 
-// $notif = [
-//     "del_ok"=> "Suppression correctement effectuée",
-//     "del_error"=> "La suppression n'a pu s'effectuer",
-//     "update_ok"=> "Votre opération a été mise à jour",
-//     "update_error"=> "Votre opération n'a pu être mise à jour",
-// ]
-
 //------------------------------------------------------------------
 //------------------------------------------------------------------
 //------------------------------------------------------------------

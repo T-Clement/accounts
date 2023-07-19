@@ -2,8 +2,6 @@
 
 
 require '_includes/_database.php';
-// var_dump($_GET);
-// var_dump(extract($_GET));
 extract($_GET);
 
 // DELETE
@@ -15,20 +13,9 @@ if ($action === "delete") {
     header("Location: index.php?del_ok");
     exit;
 
-
-
-
-
-
-    // echo json_encode([
-    //     'result' => $isOk,
-    //     'idTransaction' => $data['idTransaction'],
-    //     'notif' => 'del_ok',
-    //     'notifTxt' => 'Votre transaction a été supprimée'
-    // ]);
 }
 
-
+// UPDATE
 if ($action == "update") {
     extract($_POST);
   
