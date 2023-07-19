@@ -93,6 +93,17 @@ if (isset($_GET["notif"])) {
             }
             ?>
         </div>
+        
+
+        <?php
+        $formOperationTitle = "Modifier une opération";
+        $formValidation = "Enregistrer la modification";
+        $formCssClass = "form-update js-update-form";
+        $formLink = "actions.php?action=update";
+        require '_includes/_form.php';
+        ?>
+         
+
 
         <section class="card mb-4 rounded-3 shadow-sm">
             <div class="card-header py-3">
@@ -111,22 +122,22 @@ if (isset($_GET["notif"])) {
                         <?php
                         foreach($transactionsMonths as $transaction) {
                             $dateTransaction = new DateTime($transaction["date_transaction"]);
-                            echo '<tr class="js-transaction-row">
+                            echo '<tr class="js-transaction-row" data-category="'. $transaction["category_name"] .'">
                                     
                                     <td width="50" class="ps-3">
                                         <i class="bi bi-' . $transaction["icon_class"] .' fs-3"></i>
                                     </td>
                                     <td>
-                                        <time datetime="' . $dateTransaction->format("Y-m-d") . '" class="d-block fst-italic fw-light">' . $dateTransaction->format("d-m-Y") . '</time>
-                                        ' . $transaction['name'] . '
+                                        <time datetime="' . $dateTransaction->format("Y-m-d") . '" class="d-block fst-italic fw-light js-operation-date">' . $dateTransaction->format("d-m-Y") . '</time>
+                                        <span class="js-operation-txt">' . $transaction['name'] . '</span>
                                     </td>
                                     <td class="text-end">
-                                        <span class="rounded-pill text-nowrap ' . applyColorToOperation($transaction["amount"]) . ' px-2 js-transaction-amount" data-id="' . $transaction["id_transaction"] . '">
+                                        <span class="rounded-pill text-nowrap js-operation-amount ' . applyColorToOperation($transaction["amount"]) . ' px-2 js-transaction-amount" data-id="' . $transaction["id_transaction"] . '">
                                             '. $transaction['amount'] .'
                                         </span>
                                     </td>
                                     <td class="text-end text-nowrap">
-                                        <a class="btn btn-outline-primary btn-sm rounded-circle">
+                                        <a class="btn btn-outline-primary btn-sm rounded-circle js-update" data-id="' . $transaction["id_transaction"] . '">
                                             <i class="bi bi-pencil"></i>
                                         </a>';
                                         echo '<a href="actions.php?action=delete&id='. $transaction["id_transaction"].'" class="btn btn-outline-danger btn-sm rounded-circle js-delete" data-id="'. $transaction["id_transaction"] .'">

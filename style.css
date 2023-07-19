@@ -1,4 +1,3 @@
-/*add.php*/
 :root {
     font-size: 16px;
     
@@ -8,6 +7,40 @@
     --delete: rgb(217, 104, 24);
 
 }
+
+/*udpate Form*/
+
+.form-update {
+    display: none;
+}
+
+.form-update-active {
+    display: block;
+}
+
+/* .form {
+    display: none;
+}
+
+.form-label {
+
+}
+
+.form.active {
+    display: flex;
+    flex-direction: column;
+    gap: .5rem;
+}
+
+.form.active .form-label {
+    display: block;
+    width: 300px;
+} */
+
+
+
+
+
 
 
 /* Notification Part */
@@ -40,7 +73,7 @@
     background-color: var(--error);
 }
 
-.notif-style.up_ok {
+.notif-style.update_ok {
     background-color: var(--update);
 }
 

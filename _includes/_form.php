@@ -1,10 +1,11 @@
-<div class="container">
-        <section class="card mb-4 rounded-3 shadow-sm">
+
+        <section class="card mb-4 rounded-3 shadow-sm <?=$formCssClass?>">
             <div class="card-header py-3">
                 <h1 class="my-0 fw-normal fs-4"><?=$formOperationTitle?></h1>
             </div>
             <div class="card-body">
-                <form action="add.php" method="POST">
+                <form action="<?=$formLink?>" method="POST">
+                    <input type="hidden" class="js-operation-id" name="id" value="">
                     <div class="mb-3">
                         <label for="name" class="form-label">Nom de l'opération *</label>
                         <input type="text" class="form-control" name="name" id="name"
